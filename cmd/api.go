@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/thatguy-git/ecom/internal/products"
 )
 
 type application struct {
@@ -25,6 +27,10 @@ func (app *application) mount() http.Handler {
 	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "pong")
 	})
+	productService := products.Newservice()
+	productHandler := products.NewHandler(productService)
+	r.Get("/products", productHandler.ListProducts)
+
 	return r
 }
 
