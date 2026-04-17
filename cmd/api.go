@@ -8,11 +8,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5"
+	repo "github.com/thatguy-git/ecom/internal/adapters/sqlc"
 	"github.com/thatguy-git/ecom/internal/products"
 )
 
 type application struct {
 	config config
+	db     *pgx.Conn
 }
 
 func (app *application) mount() http.Handler {
@@ -27,9 +30,11 @@ func (app *application) mount() http.Handler {
 	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "pong")
 	})
-	productService := products.Newservice()
+	productService := products.Newservice(repo.New(app.db))
 	productHandler := products.NewHandler(productService)
 	r.Get("/products", productHandler.ListProducts)
+
+	r.Get("/product/{id}", productHandler.FindProductsbyId)
 
 	return r
 }
